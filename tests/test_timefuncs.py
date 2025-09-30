@@ -178,39 +178,26 @@ def test_timedelta_float_value() -> None:
     check(assert_type(pd.Timedelta(1.5, "h"), pd.Timedelta), pd.Timedelta)
 
 
-# In pandas-stubs/tests/test_timefuncs.py
-
-
 def test_dateoffset_float_relative_components() -> None:
-    """Test DateOffset accepts float values for relative time/date components."""
-    # Float inputs for components that should now be typed as float
-    do1 = pd.DateOffset(weeks=1.5, days=2.5, hours=3.5)
-    do2 = pd.DateOffset(minutes=45.5, seconds=30.75, milliseconds=500.25)
-    do3 = pd.DateOffset(microseconds=100.123, nanoseconds=50.1)
+    """Test DateOffset accepts float values for relative time components."""
+    # These arguments are confirmed to preserve precision when passed in 'float'
+    do_float = pd.DateOffset(
+        hours=3.5, minutes=45.5, seconds=30.75, milliseconds=500.25, nanoseconds=50.1
+    )
 
-    check(assert_type(do1, pd.DateOffset), pd.DateOffset)
-    check(assert_type(do2, pd.DateOffset), pd.DateOffset)
-    check(assert_type(do3, pd.DateOffset), pd.DateOffset)
+    # Use only integer values for components that remain 'int'
+    do_int = pd.DateOffset(weeks=1, days=2, microseconds=100)
 
-
-def test_dateoffset_float_absolute_components() -> None:
-    """Test DateOffset accepts float values for absolute snap-point components."""
-    # Test absolute components that were surprisingly permissive with floats
-    do1 = pd.DateOffset(year=2024.0, month=6.5, day=15.5)
-    do2 = pd.DateOffset(hour=12.5, minute=30.5, second=15.5)
-    do3 = pd.DateOffset(microsecond=500.5, nanosecond=50.5)
-
-    check(assert_type(do1, pd.DateOffset), pd.DateOffset)
-    check(assert_type(do2, pd.DateOffset), pd.DateOffset)
-    check(assert_type(do3, pd.DateOffset), pd.DateOffset)
+    check(assert_type(do_float, pd.DateOffset), pd.DateOffset)
+    check(assert_type(do_int, pd.DateOffset), pd.DateOffset)
 
 
 def test_timestamp_dateoffset_float_arithmetic() -> None:
     """Test arithmetic with Timestamp and a DateOffset using a float argument."""
     ts = pd.Timestamp("2024-06-20 10:00:00")
 
-    # Use a float for one of the permissive date components (e.g., days=2.5)
-    do_float = pd.DateOffset(days=2.5)
+    # Use a float for a component that IS typed as float (e.g., hours=60.0, which is 2.5 days)
+    do_float = pd.DateOffset(hours=60.0)
 
     # Assert that the result is correctly typed as a Timestamp
     check(assert_type(ts + do_float, pd.Timestamp), pd.Timestamp)
