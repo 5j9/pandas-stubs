@@ -178,6 +178,45 @@ def test_timedelta_float_value() -> None:
     check(assert_type(pd.Timedelta(1.5, "h"), pd.Timedelta), pd.Timedelta)
 
 
+# In pandas-stubs/tests/test_timefuncs.py
+
+
+def test_dateoffset_float_relative_components() -> None:
+    """Test DateOffset accepts float values for relative time/date components."""
+    # Float inputs for components that should now be typed as float
+    do1 = pd.DateOffset(weeks=1.5, days=2.5, hours=3.5)
+    do2 = pd.DateOffset(minutes=45.5, seconds=30.75, milliseconds=500.25)
+    do3 = pd.DateOffset(microseconds=100.123, nanoseconds=50.1)
+
+    check(assert_type(do1, pd.DateOffset), pd.DateOffset)
+    check(assert_type(do2, pd.DateOffset), pd.DateOffset)
+    check(assert_type(do3, pd.DateOffset), pd.DateOffset)
+
+
+def test_dateoffset_float_absolute_components() -> None:
+    """Test DateOffset accepts float values for absolute snap-point components."""
+    # Test absolute components that were surprisingly permissive with floats
+    do1 = pd.DateOffset(year=2024.0, month=6.5, day=15.5)
+    do2 = pd.DateOffset(hour=12.5, minute=30.5, second=15.5)
+    do3 = pd.DateOffset(microsecond=500.5, nanosecond=50.5)
+
+    check(assert_type(do1, pd.DateOffset), pd.DateOffset)
+    check(assert_type(do2, pd.DateOffset), pd.DateOffset)
+    check(assert_type(do3, pd.DateOffset), pd.DateOffset)
+
+
+def test_timestamp_dateoffset_float_arithmetic() -> None:
+    """Test arithmetic with Timestamp and a DateOffset using a float argument."""
+    ts = pd.Timestamp("2024-06-20 10:00:00")
+
+    # Use a float for one of the permissive date components (e.g., days=2.5)
+    do_float = pd.DateOffset(days=2.5)
+
+    # Assert that the result is correctly typed as a Timestamp
+    check(assert_type(ts + do_float, pd.Timestamp), pd.Timestamp)
+    check(assert_type(ts - do_float, pd.Timestamp), pd.Timestamp)
+
+
 def test_timedelta_series_string() -> None:
     seq_list = ["1 day"]
     check(assert_type(pd.to_timedelta(seq_list), pd.TimedeltaIndex), pd.TimedeltaIndex)
